@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Pochi — Virtual Pet</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body class="light-mode">
+
+  <!-- Notification container -->
+  <div id="notifications" aria-live="polite"></div>
+
+  <!-- Header -->
+  <header>
+    <div class="logo">🐾 Pochi</div>
+    <div class="header-controls">
+      <button id="btnDayNight" class="icon-btn" title="Toggle Day/Night">🌙</button>
+      <button id="btnReset" class="icon-btn danger" title="Reset Game">🗑️</button>
+    </div>
+  </header>
+
+  <main>
+    <!-- Left Panel: Pet + Name + Mood -->
+    <section class="card pet-card" id="petCard">
+      <div class="pet-name-row">
+        <input id="petNameInput" type="text" maxlength="16" placeholder="Name your pet…" autocomplete="off" />
+        <span id="petMoodBadge" class="mood-badge">😊 Happy</span>
+      </div>
+
+      <div class="pet-stage" id="petStage">
+        <!-- SVG Pet -->
+        <svg id="petSvg" viewBox="0 0 160 160" xmlns="http://www.w3.org/2000/svg">
+          <!-- Ears -->
+          <ellipse class="pet-ear" cx="44" cy="52" rx="18" ry="22" />
+          <ellipse class="pet-ear" cx="116" cy="52" rx="18" ry="22" />
+          <ellipse class="pet-ear-inner" cx="44" cy="54" rx="10" ry="13" />
+          <ellipse class="pet-ear-inner" cx="116" cy="54" rx="10" ry="13" />
+          <!-- Body -->
+          <ellipse class="pet-body" cx="80" cy="110" rx="42" ry="32" />
+          <!-- Head -->
+          <circle class="pet-head" cx="80" cy="80" r="46" />
+          <!-- Eyes group -->
+          <g id="eyesGroup">
+            <!-- Left eye -->
+            <g id="leftEye">
+              <circle class="eye-white" cx="63" cy="76" r="12" />
+              <circle class="eye-pupil" cx="65" cy="77" r="7" />
+              <circle class="eye-shine" cx="68" cy="74" r="2.5" />
+            </g>
+            <!-- Right eye -->
+            <g id="rightEye">
+              <circle class="eye-white" cx="97" cy="76" r="12" />
+              <circle class="eye-pupil" cx="99" cy="77" r="7" />
+              <circle class="eye-shine" cx="102" cy="74" r="2.5" />
+            </g>
+            <!-- Sleep lines (hidden by default) -->
+            <g id="sleepEyes" class="hidden">
+              <path class="sleep-line" d="M51 76 Q63 70 75 76" stroke-width="3.5" fill="none" stroke-linecap="round"/>
+              <path class="sleep-line" d="M85 76 Q97 70 109 76" stroke-width="3.5" fill="none" stroke-linecap="round"/>
+            </g>
+            <!-- Sick eyes (hidden by default) -->
+            <g id="sickEyes" class="hidden">
+              <text x="52" y="83" font-size="20" text-anchor="middle">✕</text>
+              <text x="86" y="83" font-size="20" text-anchor="middle">✕</text>
+            </g>
+          </g>
+          <!-- Nose -->
+          <ellipse class="pet-nose" cx="80" cy="91" rx="5" ry="3.5" />
+          <!-- Mouth group -->
+          <g id="mouthGroup">
+            <path id="mouthHappy" class="mouth" d="M67 99 Q80 112 93 99" stroke-width="3.5" fill="none" stroke-linecap="round"/>
+            <path id="mouthNormal" class="mouth hidden" d="M68 103 Q80 108 92 103" stroke-width="3.5" fill="none" stroke-linecap="round"/>
+            <path id="mouthSad" class="mouth hidden" d="M67 108 Q80 98 93 108" stroke-width="3.5" fill="none" stroke-linecap="round"/>
+            <path id="mouthSick" class="mouth hidden" d="M67 107 Q80 100 93 107 Q80 112 67 107Z" stroke-width="2" fill="none" stroke-linecap="round"/>
+          </g>
+          <!-- Blush (hidden when sad/sick) -->
+          <ellipse id="blushLeft" class="blush" cx="50" cy="92" rx="10" ry="6" opacity="0.45"/>
+          <ellipse id="blushRight" class="blush" cx="110" cy="92" rx="10" ry="6" opacity="0.45"/>
+          <!-- Tail -->
+          <path class="pet-tail" d="M122 118 Q148 108 144 132 Q140 148 125 138" stroke-width="6" fill="none" stroke-linecap="round"/>
+          <!-- Feet -->
+          <ellipse class="pet-foot" cx="60" cy="138" rx="14" ry="9" />
+          <ellipse class="pet-foot" cx="100" cy="138" rx="14" ry="9" />
+          <!-- Tummy -->
+          <ellipse class="pet-tummy" cx="80" cy="112" rx="26" ry="19" />
+          <!-- Zzz (sleep only) -->
+          <g id="sleepZzz" class="hidden">
+            <text class="zzz" x="118" y="58" font-size="14">z</text>
+            <text class="zzz" x="128" y="46" font-size="18">z</text>
+            <text class="zzz" x="140" y="32" font-size="22">Z</text>
+          </g>
+          <!-- Sick swirls -->
+          <g id="sickSwirls" class="hidden">
+            <text x="20" y="50" font-size="20">💫</text>
+            <text x="120" y="44" font-size="16">💫</text>
+          </g>
+        </svg>
+        <div id="skinSelector" class="skin-selector">
+          <button class="skin-btn active" data-skin="default" title="Classic">🐱</button>
+          <button class="skin-btn" data-skin="bunny" title="Bunny">🐰</button>
+          <button class="skin-btn" data-skin="bear" title="Bear">🐻</button>
+        </div>
+      </div>
+
+      <div class="age-display">
+        🎂 Age: <span id="petAge">0</span> days &nbsp;|&nbsp;
+        ⭐ Lv <span id="petLevel">1</span>
+      </div>
+    </section>
+
+    <!-- Right Panel: Stats + Actions + XP -->
+    <section class="right-panel">
+
+      <!-- Stats -->
+      <div class="card stats-card">
+        <h2 class="card-title">📊 Stats</h2>
+        <div class="stat-row">
+          <span class="stat-label">🍖 Hunger</span>
+          <div class="stat-bar-wrap"><div class="stat-bar hunger-bar" id="barHunger"></div></div>
+          <span class="stat-val" id="valHunger">100</span>
+        </div>
+        <div class="stat-row">
+          <span class="stat-label">💖 Happy</span>
+          <div class="stat-bar-wrap"><div class="stat-bar happy-bar" id="barHappy"></div></div>
+          <span class="stat-val" id="valHappy">100</span>
+        </div>
+        <div class="stat-row">
+          <span class="stat-label">⚡ Energy</span>
+          <div class="stat-bar-wrap"><div class="stat-bar energy-bar" id="barEnergy"></div></div>
+          <span class="stat-val" id="valEnergy">100</span>
+        </div>
+        <div class="stat-row">
+          <span class="stat-label">❤️ Health</span>
+          <div class="stat-bar-wrap"><div class="stat-bar health-bar" id="barHealth"></div></div>
+          <span class="stat-val" id="valHealth">100</span>
+        </div>
+      </div>
+
+      <!-- XP -->
+      <div class="card xp-card">
+        <div class="xp-header">
+          <span>🌟 Level <span id="xpLevel">1</span></span>
+          <span id="xpText">0 / 100 XP</span>
+        </div>
+        <div class="xp-bar-wrap"><div class="xp-bar" id="xpBar"></div></div>
+      </div>
+
+      <!-- Actions -->
+      <div class="card actions-card">
+        <h2 class="card-title">🎮 Actions</h2>
+        <div class="action-grid">
+          <button class="action-btn feed" id="btnFeed">
+            <span class="btn-icon">🍖</span>
+            <span class="btn-label">Feed</span>
+            <span class="btn-sub">+20 hunger</span>
+          </button>
+          <button class="action-btn play" id="btnPlay">
+            <span class="btn-icon">🎾</span>
+            <span class="btn-label">Play</span>
+            <span class="btn-sub">+20 happy</span>
+          </button>
+          <button class="action-btn sleep-btn" id="btnSleep">
+            <span class="btn-icon">😴</span>
+            <span class="btn-label">Sleep</span>
+            <span class="btn-sub">+30 energy</span>
+          </button>
+          <button class="action-btn heal" id="btnHeal">
+            <span class="btn-icon">💊</span>
+            <span class="btn-label">Heal</span>
+            <span class="btn-sub">+25 health</span>
+          </button>
+          <button class="action-btn clean" id="btnClean">
+            <span class="btn-icon">🛁</span>
+            <span class="btn-label">Clean</span>
+            <span class="btn-sub">+10 each</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Achievements -->
+      <div class="card achiev-card">
+        <h2 class="card-title">🏆 Achievements</h2>
+        <div id="achievList" class="achiev-list"></div>
+      </div>
+    </section>
+  </main>
+
+  <script src="script.js"></script>
+</body>
+</html>
